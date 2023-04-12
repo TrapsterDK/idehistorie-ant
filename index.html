@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <style>
+            body {
+                margin: 0;
+            }
+        </style>
+
+        <script src="https://unpkg.com/3d-force-graph"></script>
+        <!--<script src="../../dist/3d-force-graph.js"></script>-->
+    </head>
+    <body>
+        <div id="3d-graph"></div>
+
+        <script>
+            class RGBColor {
+                constructor(r, g, b) {
+                    this.r = r;
+                    this.g = g;
+                    this.b = b;
+                }
+
+                static hsv(h, s, v) {
+                    return new RGBColor(...RGBColor.hsvToRgb(h, s, v));
+                }
+
+                toString() {
+                    return `rgb(${this.r},${this.g},${this.b})`;
+                }
+
+                /**
+                 * Converts an RGB color value to HSV. Conversion formula
+                 * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+                 * Assumes r, g, and b are contained in the set [0, 255] and
+                 * returns h, s, and v in the set [0, 1].
+                 *
+                 * @param   Number  r       The red color value
+                 * @param   Number  g       The green color value
+                 * @param   Number  b       The blue color value
+                 * @return  Array           The HSV representation
+                 */
+                rgbToHsv() {
+                    var r = this.r / 255,
+                        g = this.g / 255,
+                        b = this.b / 255;
+
+                    var max = Math.max(r, g, b),
+                        min = Math.min(r, g, b);
+                    var h,
+                        s,
+                        v = max;
+
+                    var d = max - min;
+                    s = max == 0 ? 0 : d / max;
+
+                    if (max == min) {
+                        h = 0; // achromatic
+                    } else {
+                        switch (max) {
+                            case r:
+                                h = (g - b) / d + (g < b ? 6 : 0);
+                                break;
+                            case g:
+                                h = (b - r) / d + 2;
+                                break;
+                            case b:
+                                h = (r - g) / d + 4;
+                                break;
+                        }
+
+                        h /= 6;
+                    }
+
+                    return [h, s, v];
+                }
+
+                /**
+                 * Converts an HSV color value to RGB. Conversion formula
+                 * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+                 * Assumes h, s, and v are contained in the set [0, 1] and
+                 * returns r, g, and b in the set [0, 255].
+                 *
+                 * @param   Number  h       The hue
+                 * @param   Number  s       The saturation
+                 * @param   Number  v       The value
+                 * @return  Array           The RGB representation
+                 */
+                static hsvToRgb(h, s, v) {
+                    var r, g, b;
+
+                    var i = Math.floor(h * 6);
+                    var f = h * 6 - i;
+                    var p = v * (1 - s);
+                    var q = v * (1 - f * s);
+                    var t = v * (1 - (1 - f) * s);
+
+                    switch (i % 6) {
+                        case 0:
+                            (r = v), (g = t), (b = p);
+                            break;
+                        case 1:
+                            (r = q), (g = v), (b = p);
+                            break;
+                        case 2:
+                            (r = p), (g = v), (b = t);
+                            break;
+                        case 3:
+                            (r = p), (g = q), (b = v);
+                            break;
+                        case 4:
+                            (r = t), (g = p), (b = v);
+                            break;
+                        case 5:
+                            (r = v), (g = p), (b = q);
+                            break;
+                    }
+
+                    return [r * 255, g * 255, b * 255];
+                }
+
+                // Returns a new RGBColor with the same hue but different saturation and value
+                brightness(s, v) {
+                    const [h, s, v] = this.rgbToHsv();
+                    return new RGBColor(...RGBColor.hsvToRgb(h, s, v));
+                }
+            }
+
+            // const variables
+            const CLICK_HIGHLIGHT_BRIGHTNESS = 0.9;
+            const HOVER_HIGHLIGHT_BRIGHTNESS = 1;
+
+            const FULL_BRIGHTNESS = 1;
+
+            const CLICK_PARTICLES = 2;
+            const HIGHLIGHT_PARTICLES = 1;
+
+            const ORANGE = RGBColor.hsv(20, 0.6, 0.6);
+            const CYAN = RGBColor.hsv(180, 0.6, 0.6);
+            const PINK = RGBColor.hsv(328, 0.6, 0.6);
+
+            // Random tree
+            const N = 80;
+            const gData = {
+                nodes: [...Array(N).keys()].map((i) => ({
+                    id: i,
+                    color: [ORANGE, CYAN, PINK][Math.floor(Math.random() * 3)],
+                })),
+                links: [...Array(N).keys()]
+                    .filter((id) => id)
+                    .map((id) => ({
+                        source: id,
+                        target: Math.round(Math.random() * (id - 1)),
+                    })),
+            };
+
+            // cross-link node objects
+            gData.links.forEach((link) => {
+                const a = gData.nodes[link.source];
+                const b = gData.nodes[link.target];
+                !a.neighbors && (a.neighbors = []);
+                !b.neighbors && (b.neighbors = []);
+                a.neighbors.push(b);
+                b.neighbors.push(a);
+
+                !a.links && (a.links = []);
+                !b.links && (b.links = []);
+                a.links.push(link);
+                b.links.push(link);
+            });
+
+            const clickNodes = new Set();
+            const clickLinks = new Set();
+            let clickNode = null;
+
+            const highlightNodes = new Set();
+            const highlightLinks = new Set();
+            let highlightNode = null;
+
+            const Graph = ForceGraph3D()(document.getElementById("3d-graph"))
+                .graphData(gData)
+                .nodeRelSize(6)
+                .nodeColor((node) => {
+                    if (clickNodes.has(node))
+                        return node.color
+                            .brightness(CLICK_HIGHLIGHT_BRIGHTNESS)
+                            .toString();
+
+                    if (highlightNodes.has(node))
+                        return node.color
+                            .brightness(HOVER_HIGHLIGHT_BRIGHTNESS)
+                            .toString();
+
+                    return node.color.toString();
+                })
+                .linkDirectionalParticles((link) => {
+                    if (clickLinks.has(link)) return CLICK_PARTICLES;
+                    if (highlightLinks.has(link)) return HIGHLIGHT_PARTICLES;
+                    return 0;
+                })
+                .linkDirectionalParticleColor((link) => {
+                    return link.source.color
+                        .brightness(FULL_BRIGHTNESS)
+                        .toString();
+                })
+                .linkDirectionalParticleWidth(5)
+                .linkDirectionalParticleSpeed(0.005)
+                .linkWidth(2)
+                .onNodeClick((node) => {
+                    // no state change
+                    if (node && clickNode === node) return;
+
+                    // clear state
+                    clickNodes.clear();
+                    clickLinks.clear();
+
+                    // update state
+                    clickNodes.add(node);
+                    node.neighbors.forEach((neighbor) =>
+                        clickNodes.add(neighbor)
+                    );
+                    node.links.forEach((link) => clickLinks.add(link));
+
+                    clickNode = node;
+
+                    UpdateGraph();
+                })
+                .onNodeHover((node) => {
+                    // no state change
+                    if (
+                        (!node && !highlightNodes.size) ||
+                        (node && highlightNode === node)
+                    )
+                        return;
+
+                    // clear state
+                    highlightNodes.clear();
+                    highlightLinks.clear();
+
+                    if (node) {
+                        // update state
+                        highlightNodes.add(node);
+
+                        node.links.forEach((link) => highlightLinks.add(link));
+                    }
+
+                    highlightNode = node || null;
+
+                    UpdateGraph();
+                });
+
+            // update graph
+            function UpdateGraph() {
+                Graph.nodeColor(Graph.nodeColor()).linkDirectionalParticles(
+                    Graph.linkDirectionalParticles()
+                );
+            }
+        </script>
+    </body>
+</html>
