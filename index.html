@@ -8,33 +8,119 @@
         <style>
             body {
                 margin: 0;
+                padding: 0;
+            }
+
+            h1, h2, h3, h4, h5, h6, span, p {
+                font-family: "Times New Roman", Times, serif;
+            }
+
+            .main {
+                display: flex;
+                flex-direction: row;
+            }
+
+            #info {
+                padding: 30px;
+                background-color: rgba(20, 20, 20);
+                color: white;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .node-label {
+                font-size: 12px;
+                padding: 1px 4px;
+                border-radius: 4px;
+                background-color: rgba(0, 0, 0, 0.5);
+                user-select: none;
+            }
+
+            #title {
+                /*center and box*/
+                padding: 10px;
+                margin: 0px 10px;
+                text-align: center;
+                font-size: 30px;
+                font-weight: bold;
+                color: white;
+                background-color: rgba(40, 40, 40);
+                border-radius: 10px;
+            }
+
+            #typecolorcircle {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background-color: rgba(255, 165, 0);
+                vertical-align: middle;
             }
         </style>
 
         <script src="https://unpkg.com/3d-force-graph"></script>
-        <!--<script src="../../dist/3d-force-graph.js"></script>-->
     </head>
     <body>
-        <div id="3d-graph"></div>
+        <div class="main">
+            <div id="graph"></div>
+            <div id="info">
+                <div>
+                    <h1 id="title">Title</h3>
+                    <h2 id="type">Type: <span id="typecolorcircle"></span> <span id="typenavn">Loremaldaa</span></h2>
 
-        <script>
-            class HSVColor {
-                constructor(h, s, v) {
-                    this.h = h;
-                    this.s = s;
-                    this.v = v;
+                    <h2>
+                        Generelt:
+                    </h2>
+                    <p id="text">
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Quisquam, quod.
+                    </p>
+                    <h2>
+                        Relationer:
+                    </h2>
+                    <p id="relation">
+                        -Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        -Lorem ipsum dolor sit amet consectetur adipisicing elit.
+
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three/build/three.module.js"
+                }
+            }
+        </script>
+        <script type="module">
+            import {
+                CSS2DRenderer,
+                CSS2DObject,
+            } from "//unpkg.com/three/examples/jsm/renderers/CSS2DRenderer.js";
+
+            class RGBColor {
+                constructor(r, g, b) {
+                    this.r = r;
+                    this.g = g;
+                    this.b = b;
                 }
 
                 toString() {
-                    return `hsv(${this.h}, ${this.s}, ${this.v})`;
+                    return `rgb(${this.r}, ${this.g}, ${this.b})`;
                 }
             }
 
             const PARTICLES = 2;
 
-            const ORANGE = new HSVColor(20, 1, 1);
-            const CYAN = new HSVColor(180, 1, 1);
-            const PINK = new HSVColor(328, 1, 1);
+            const ORANGE = new RGBColor(255, 165, 0);
+            const CYAN = new RGBColor(0, 255, 255);
+            const PINK = new RGBColor(255, 105, 180);
+            const RED = new RGBColor(255, 0, 0);
+            const GREEN = new RGBColor(0, 255, 0);
 
             // Random tree
             const N = 80;
@@ -66,21 +152,35 @@
                 b.links.push(link);
             });
 
-            const clickNodes = new Set();
             const clickLinks = new Set();
             let clickNode = null;
 
-            const highlightNodes = new Set();
             const highlightLinks = new Set();
             let highlightNode = null;
 
-            const Graph = ForceGraph3D()(document.getElementById("3d-graph"))
+            const Graph = ForceGraph3D({
+                extraRenderers: [new CSS2DRenderer()],
+            })(document.getElementById("graph"))
                 .graphData(gData)
                 .nodeRelSize(6)
                 .nodeColor((node) => {
+                    if (clickNode === node) return RED.toString();
+                    if (highlightNode === node) return GREEN.toString();
                     return node.color.toString();
                 })
                 .nodeOpacity(0.8)
+                .nodeThreeObject((node) => {
+                    const nodeEl = document.createElement("div");
+                    nodeEl.textContent = "Some text";
+                    var color = node.color.toString();
+                    if (highlightNode === node) color = GREEN.toString();
+                    if (clickNode === node) color = RED.toString();
+
+                    nodeEl.style.color = color;
+                    nodeEl.className = "node-label";
+                    return new CSS2DObject(nodeEl);
+                })
+                .nodeThreeObjectExtend(true)
                 .linkDirectionalParticles((link) => {
                     if (clickLinks.has(link) || highlightLinks.has(link))
                         return PARTICLES;
@@ -96,51 +196,63 @@
                     // no state change
                     if (node && clickNode === node) return;
 
-                    // clear state
-                    clickNodes.clear();
                     clickLinks.clear();
 
-                    // update state
-                    clickNodes.add(node);
-                    node.neighbors.forEach((neighbor) =>
-                        clickNodes.add(neighbor)
-                    );
                     node.links.forEach((link) => clickLinks.add(link));
 
                     clickNode = node;
 
                     UpdateGraph();
+                    updateCamera(node);
                 })
                 .onNodeHover((node) => {
                     // no state change
-                    if (
-                        (!node && !highlightNodes.size) ||
-                        (node && highlightNode === node)
-                    )
-                        return;
+                    if (node && highlightNode === node) return;
 
                     // clear state
-                    highlightNodes.clear();
                     highlightLinks.clear();
 
                     if (node) {
-                        // update state
-                        highlightNodes.add(node);
-
                         node.links.forEach((link) => highlightLinks.add(link));
                     }
 
                     highlightNode = node || null;
 
                     UpdateGraph();
-                });
+                })
+                .width(window.innerWidth - 400)
+                .height(window.innerHeight);
+
+            const dist = Graph.d3Force("link").distance(50);
+
+            function updateCamera(node) {
+                // Aim at node from outside it
+                const distance = 400;
+                const distRatio =
+                    1 + distance / Math.hypot(node.x, node.y, node.z);
+                Graph.cameraPosition(
+                    {
+                        x: node.x * distRatio,
+                        y: node.y * distRatio,
+                        z: node.z * distRatio,
+                    }, // new position
+                    node, // lookAt ({ x, y, z })
+                    2000 // ms transition duration
+                );
+            }
 
             // update graph
             function UpdateGraph() {
                 Graph.nodeColor(Graph.nodeColor())
                     .linkDirectionalParticles(Graph.linkDirectionalParticles())
-                    .nodeOpacity(Graph.nodeOpacity());
+                    .nodeOpacity(Graph.nodeOpacity())
+                    .nodeThreeObject(Graph.nodeThreeObject());
             }
+
+            // canvas resize
+            window.addEventListener("resize", () => {
+                Graph.width(window.innerWidth - 400).height(window.innerHeight);
+            });
         </script>
     </body>
 </html>
