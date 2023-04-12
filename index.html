@@ -18,65 +18,19 @@
         <div id="3d-graph"></div>
 
         <script>
-            class RGBColor {
-                constructor(r, g, b) {
-                    this.r = r;
-                    this.g = g;
-                    this.b = b;
-                }
-
-                static hsv(h, s, v) {
-                    return new RGBColor(...RGBColor.hsvToRgb(h, s, v));
+            class HSVColor {
+                constructor(h, s, v) {
+                    this.h = h;
+                    this.s = s;
+                    this.v = v;
                 }
 
                 toString() {
-                    return `rgb(${this.r},${this.g},${this.b})`;
+                    return `hsv(${this.h}, ${this.s}, ${this.v})`;
                 }
 
-                /**
-                 * Converts an RGB color value to HSV. Conversion formula
-                 * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
-                 * Assumes r, g, and b are contained in the set [0, 255] and
-                 * returns h, s, and v in the set [0, 1].
-                 *
-                 * @param   Number  r       The red color value
-                 * @param   Number  g       The green color value
-                 * @param   Number  b       The blue color value
-                 * @return  Array           The HSV representation
-                 */
-                rgbToHsv() {
-                    var r = this.r / 255,
-                        g = this.g / 255,
-                        b = this.b / 255;
-
-                    var max = Math.max(r, g, b),
-                        min = Math.min(r, g, b);
-                    var h,
-                        s,
-                        v = max;
-
-                    var d = max - min;
-                    s = max == 0 ? 0 : d / max;
-
-                    if (max == min) {
-                        h = 0; // achromatic
-                    } else {
-                        switch (max) {
-                            case r:
-                                h = (g - b) / d + (g < b ? 6 : 0);
-                                break;
-                            case g:
-                                h = (b - r) / d + 2;
-                                break;
-                            case b:
-                                h = (r - g) / d + 4;
-                                break;
-                        }
-
-                        h /= 6;
-                    }
-
-                    return [h, s, v];
+                toStringRGB() {
+                    return `rgb(${this.toRGB().toString()})`;
                 }
 
                 /**
@@ -90,7 +44,7 @@
                  * @param   Number  v       The value
                  * @return  Array           The RGB representation
                  */
-                static hsvToRgb(h, s, v) {
+                static toRgb(h, s, v) {
                     var r, g, b;
 
                     var i = Math.floor(h * 6);
@@ -123,25 +77,24 @@
                     return [r * 255, g * 255, b * 255];
                 }
 
-                // Returns a new RGBColor with the same hue but different saturation and value
-                brightness(s, v) {
-                    const [h, s, v] = this.rgbToHsv();
-                    return new RGBColor(...RGBColor.hsvToRgb(h, s, v));
+                // Change saturation and value of this color
+                satVal(val) {
+                    return new HSVColor(this.h, 1, val);
                 }
             }
 
             // const variables
-            const CLICK_HIGHLIGHT_BRIGHTNESS = 0.9;
-            const HOVER_HIGHLIGHT_BRIGHTNESS = 1;
+            const CLICK_HIGHLIGHT_BRIGHTNESS = 0.6;
+            const HOVER_HIGHLIGHT_BRIGHTNESS = 0.75;
 
             const FULL_BRIGHTNESS = 1;
 
             const CLICK_PARTICLES = 2;
             const HIGHLIGHT_PARTICLES = 1;
 
-            const ORANGE = RGBColor.hsv(20, 0.6, 0.6);
-            const CYAN = RGBColor.hsv(180, 0.6, 0.6);
-            const PINK = RGBColor.hsv(328, 0.6, 0.6);
+            const ORANGE = new HSVColor(20, 1, 1);
+            const CYAN = new HSVColor(180, 1, 1);
+            const PINK = new HSVColor(328, 1, 1);
 
             // Random tree
             const N = 80;
@@ -187,25 +140,34 @@
                 .nodeColor((node) => {
                     if (clickNodes.has(node))
                         return node.color
-                            .brightness(CLICK_HIGHLIGHT_BRIGHTNESS)
+                            .satVal(CLICK_HIGHLIGHT_BRIGHTNESS)
                             .toString();
 
                     if (highlightNodes.has(node))
                         return node.color
-                            .brightness(HOVER_HIGHLIGHT_BRIGHTNESS)
+                            .satVal(HOVER_HIGHLIGHT_BRIGHTNESS)
                             .toString();
 
                     return node.color.toString();
                 })
+                .nodeOpacity(1)
                 .linkDirectionalParticles((link) => {
                     if (clickLinks.has(link)) return CLICK_PARTICLES;
                     if (highlightLinks.has(link)) return HIGHLIGHT_PARTICLES;
                     return 0;
                 })
                 .linkDirectionalParticleColor((link) => {
-                    return link.source.color
-                        .brightness(FULL_BRIGHTNESS)
-                        .toString();
+                    if (clickLinks.has(link))
+                        return link.source.color
+                            .satVal(CLICK_HIGHLIGHT_BRIGHTNESS)
+                            .toString();
+
+                    if (highlightLinks.has(link))
+                        return link.source.color
+                            .satVal(HOVER_HIGHLIGHT_BRIGHTNESS)
+                            .toString();
+
+                    return link.color.toString();
                 })
                 .linkDirectionalParticleWidth(5)
                 .linkDirectionalParticleSpeed(0.005)
