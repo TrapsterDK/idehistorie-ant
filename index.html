@@ -11,9 +11,14 @@
             href="https://fonts.googleapis.com/icon?family=Material+Icons"
         />
         <style>
-            body {
+            head,
+            body,
+            .main {
                 margin: 0;
                 padding: 0;
+                overflow-x: hidden;
+                width: 100vw;
+                height: 100vh;
             }
 
             h1,
@@ -40,6 +45,7 @@
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
+                position: relative;
             }
 
             #info {
@@ -72,7 +78,7 @@
                 background-color: rgba(40, 40, 40);
                 padding: 0px 30px;
                 color: white;
-                margin-top: auto;
+                bottom: 0;
             }
 
             li {
@@ -109,7 +115,42 @@
             }
 
             #typespan {
-                margin-left: 20%;
+                margin-left: 10%;
+            }
+
+            @media (max-width: 1000px) {
+                .main {
+                    flex-direction: column;
+                }
+
+                #content {
+                    height: calc(100% + 1px);
+                    width: calc(100% + 1px);
+                }
+
+                #info {
+                    flex-direction: column;
+                }
+
+                /* width */
+                ::-webkit-scrollbar {
+                    width: 12px;
+                }
+
+                /* Track */
+                ::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                }
+
+                /* Handle */
+                ::-webkit-scrollbar-thumb {
+                    background: #888;
+                }
+
+                /* Handle on hover */
+                ::-webkit-scrollbar-thumb:hover {
+                    background: #555;
+                }
             }
         </style>
 
@@ -167,7 +208,7 @@
             } from "//unpkg.com/three/examples/jsm/renderers/CSS2DRenderer.js";
 
             document
-                .getElementById("helpicon")
+                .getElementById("helpwrapper")
                 .addEventListener("click", () => {
                     document
                         .getElementById("helplist")
@@ -226,6 +267,7 @@
                     relation: [
                         "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
                         "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+                        "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
                     ],
                     type: [TYPE_1, TYPE_2, TYPE_3][
                         Math.floor(Math.random() * 3)
@@ -266,7 +308,7 @@
                 extraRenderers: [new CSS2DRenderer()],
             })(document.getElementById("graph"))
                 .graphData(gData)
-                .nodeRelSize(10)
+                .nodeRelSize(11)
                 .nodeColor((node) => {
                     if (clickNode === node) return RED.toString();
                     if (highlightNode === node) return GREEN.toString();
@@ -324,9 +366,7 @@
                     highlightNode = node || null;
 
                     UpdateGraph();
-                })
-                .width(window.innerWidth - 400)
-                .height(window.innerHeight);
+                });
 
             const dist = Graph.d3Force("link").distance(50);
 
@@ -375,8 +415,20 @@
 
             // canvas resize
             window.addEventListener("resize", () => {
-                Graph.width(window.innerWidth - 400).height(window.innerHeight);
+                // desktop
+                if (1000 < window.innerWidth) {
+                    var infowidth = Math.min(400, window.innerWidth * 0.35);
+                    var width = window.innerWidth - infowidth;
+                    Graph.width(width).height(window.innerHeight);
+                    return;
+                }
+
+                // tablet and mobile
+                let height = Math.min(500, window.innerWidth);
+                Graph.width(window.innerWidth - 11).height(height);
             });
+
+            window.dispatchEvent(new Event("resize"));
         </script>
     </body>
 </html>
