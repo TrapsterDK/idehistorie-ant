@@ -266,7 +266,7 @@
                 extraRenderers: [new CSS2DRenderer()],
             })(document.getElementById("graph"))
                 .graphData(gData)
-                .nodeRelSize(12)
+                .nodeRelSize(10)
                 .nodeColor((node) => {
                     if (clickNode === node) return RED.toString();
                     if (highlightNode === node) return GREEN.toString();
