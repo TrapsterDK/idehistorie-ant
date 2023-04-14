@@ -21,14 +21,7 @@
                 height: 100vh;
             }
 
-            h1,
-            h2,
-            h3,
-            h4,
-            h5,
-            h6,
-            span,
-            p {
+            * {
                 font-family: "Times New Roman", Times, serif;
             }
 
@@ -41,11 +34,10 @@
                 color: white;
                 background-color: rgba(20, 20, 20);
                 width: 100%;
-                height: 100vh;
+                height: 100%;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                position: relative;
             }
 
             #info {
@@ -114,8 +106,18 @@
                 display: none;
             }
 
+            #forfun {
+                margin-left: 15%;
+            }
+
             #typespan {
-                margin-left: 10%;
+                white-space: nowrap;
+            }
+
+            #graph {
+                width: 100%;
+                height: 100%;
+                margin: -0.55px;
             }
 
             @media (max-width: 1000px) {
@@ -155,44 +157,6 @@
         </style>
 
         <script src="https://unpkg.com/3d-force-graph"></script>
-    </head>
-    <body>
-        <div class="main">
-            <div id="graph"></div>
-            <div id="content">
-                <div id="info">
-                    <h1 id="title">Node</h1>
-                    <h2 id="type">
-                        Type:
-                        <span id="typespan">
-                            <span id="typecolorcircle"></span>
-                            <span id="typenavn">Type</span>
-                        </span>
-                    </h2>
-                    <h2>Generelt:</h2>
-                    <p id="text"></p>
-                    <h2>Relationer:</h2>
-                    <ul id="relations"></ul>
-                </div>
-                <div id="help">
-                    <div id="helpwrapper">
-                        <h2>Hjælp</h2>
-                        <i class="material-icons" id="helpicon">expand_more</i>
-                    </div>
-                    <ul id="helplist">
-                        <li>Klik på en node for at se mere information.</li>
-                        <li>
-                            Noderne repræsenterer forskellige typer aktører.
-                        </li>
-                        <li>
-                            Retningen på forbindelsen mellem aktører kan se ved
-                            at klikke på en node eller ved at holde musen over
-                            en node.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
 
         <script type="importmap">
             {
@@ -347,10 +311,11 @@
 
                     node.links.forEach((link) => clickNodes.add(link));
 
+                    UpdateCamera(node);
+
                     clickNode = node;
 
                     UpdateGraph();
-                    UpdateCamera(node);
                     UpdateInfo(node);
                 })
                 .onNodeHover((node) => {
@@ -374,18 +339,24 @@
             function UpdateCamera(node) {
                 // get distance from the current camera position to the node
                 const distance = Math.hypot(
-                    node.x - Graph.cameraPosition().x,
-                    node.y - Graph.cameraPosition().y,
-                    node.z - Graph.cameraPosition().z
+                    clickNode.x - Graph.cameraPosition().x,
+                    clickNode.y - Graph.cameraPosition().y,
+                    clickNode.z - Graph.cameraPosition().z
                 );
 
-                const distRatio =
-                    1 + distance / Math.hypot(node.x, node.y, node.z);
+                const nodelen = Math.hypot(node.x, node.y, node.z);
+
+                const e_vec = {
+                    x: node.x / nodelen,
+                    y: node.y / nodelen,
+                    z: node.z / nodelen,
+                };
+
                 Graph.cameraPosition(
                     {
-                        x: node.x * distRatio,
-                        y: node.y * distRatio,
-                        z: node.z * distRatio,
+                        x: node.x + e_vec.x * distance,
+                        y: node.y + e_vec.y * distance,
+                        z: node.z + e_vec.z * distance,
                     }, // new position
                     node, // lookAt ({ x, y, z })
                     1500 // ms transition duration
@@ -425,6 +396,7 @@
                 if (1000 < window.innerWidth) {
                     var infowidth = Math.min(400, window.innerWidth * 0.35);
                     var width = window.innerWidth - infowidth;
+                    console.log(window.innerHeight);
                     Graph.width(width).height(window.innerHeight);
                     return;
                 }
@@ -436,5 +408,44 @@
 
             window.dispatchEvent(new Event("resize"));
         </script>
+    </head>
+    <body>
+        <div class="main">
+            <div id="graph"></div>
+            <div id="content">
+                <div id="info">
+                    <h1 id="title">Node</h1>
+                    <h2 id="type">
+                        Type:
+                        <span id="forfun"></span>
+                        <a id="typespan">
+                            <span id="typecolorcircle"></span>
+                            <span id="typenavn">Type</span>
+                        </a>
+                    </h2>
+                    <h2>Generelt:</h2>
+                    <p id="text"></p>
+                    <h2>Relationer:</h2>
+                    <ul id="relations"></ul>
+                </div>
+                <div id="help">
+                    <div id="helpwrapper">
+                        <h2>Hjælp</h2>
+                        <i class="material-icons" id="helpicon">expand_more</i>
+                    </div>
+                    <ul id="helplist">
+                        <li>Klik på en node for at se mere information.</li>
+                        <li>
+                            Noderne repræsenterer forskellige typer aktører.
+                        </li>
+                        <li>
+                            Retningen på forbindelsen mellem aktører kan se ved
+                            at klikke på en node eller ved at holde musen over
+                            en node.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
