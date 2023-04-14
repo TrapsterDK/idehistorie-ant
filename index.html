@@ -245,6 +245,7 @@
             const PINK = new RGBColor(255, 105, 180);
             const RED = new RGBColor(255, 0, 0);
             const GREEN = new RGBColor(0, 255, 0);
+            const GRAY = new RGBColor(128, 128, 128);
 
             class Type {
                 constructor(name, color) {
@@ -333,7 +334,7 @@
                     return 0;
                 })
                 .linkDirectionalParticleColor((link) => {
-                    return link.source.type.color.toString();
+                    return GRAY.toString();
                 })
                 .linkDirectionalParticleWidth(7)
                 .linkDirectionalParticleSpeed(0.005)
@@ -371,8 +372,13 @@
             const dist = Graph.d3Force("link").distance(50);
 
             function UpdateCamera(node) {
-                // Aim at node from outside it
-                const distance = 400;
+                // get distance from the current camera position to the node
+                const distance = Math.hypot(
+                    node.x - Graph.cameraPosition().x,
+                    node.y - Graph.cameraPosition().y,
+                    node.z - Graph.cameraPosition().z
+                );
+
                 const distRatio =
                     1 + distance / Math.hypot(node.x, node.y, node.z);
                 Graph.cameraPosition(
@@ -382,7 +388,7 @@
                         z: node.z * distRatio,
                     }, // new position
                     node, // lookAt ({ x, y, z })
-                    2000 // ms transition duration
+                    1500 // ms transition duration
                 );
             }
 
