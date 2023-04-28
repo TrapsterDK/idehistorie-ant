@@ -218,11 +218,12 @@
                 }
             }
 
-            const TYPE_1 = new Type("Loremaldaa", ORANGE);
-            const TYPE_2 = new Type("VADLASD", CYAN);
-            const TYPE_3 = new Type("RASTHSA", PINK);
+            const TYPE_HUMAN = new Type("Human", ORANGE);
+            const TYPE_IDE = new Type("Ideer, koncepter og faktorer", CYAN);
+            const TYPE_NON_HUMAN = new Type("Non human", PINK);
 
             // Random tree
+            /*
             const N = 80;
             const gData = {
                 nodes: [...Array(N).keys()].map((i) => ({
@@ -234,9 +235,7 @@
                         "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
                         "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
                     ],
-                    type: [TYPE_1, TYPE_2, TYPE_3][
-                        Math.floor(Math.random() * 3)
-                    ],
+                    type: [TYPE_HUMAN, TYPE_IDE][Math.floor(Math.random() * 3)],
                 })),
                 links: [...Array(N).keys()]
                     .filter((id) => id)
@@ -257,6 +256,333 @@
 
                 !a.links && (a.links = []);
                 !b.links && (b.links = []);
+                a.links.push(link);
+                b.links.push(link);
+            });
+            console.log(gData);
+            */
+
+            let gData = {
+                nodes: [
+                    {
+                        title: "Internet som informationskilde",
+                        text: `Internet som informationskilde er som adskiller sig fra andre informationskilder i dens størrelse da der næsten uanede mængder af informationer om det meste. Men måden information bliver fremstillet er også væsentligt anderledes end andre. Dette beskriver Nicholas Carr i sin artikel “Is Google Making Us Stupid?” han skriver sådan her:
+                        “As the media theorist Marshall McLuhan pointed out in the 1960s, media are not just passive channels of information. They supply the stuff of thought, but they also shape the process of thought. And what the Net seems to be doing is chipping away my capacity for concentration and contemplation. My mind now expects to take in information the way the Net distributes it: in a swiftly moving stream of particles. Once I was a scuba diver in the sea of words. Now I zip along the surface like a guy on a Jet Ski.”
+                        Man skal være opmærksom på at ikke alt er sandet på internet dette stiller krav til læserens analyse evner.
+                        `,
+                        relation: [
+                            "Læser bruger internet til at finde information om ting som andre har beskrevet og ved noget om.",
+                            "Forfatter formidler noget de ved på internet, og for at kunne formilde det best muligt bruger de nok internet til at informations søge og finde inspiertion.",
+                            "Søgemaskinen er det værktøj der sætter mennesker sammen med den information de søger forhåbentlig.",
+                            "Browser er vinduet indtil den kæmpe database af sande og falske informationer",
+                        ],
+                        type: TYPE_IDE,
+                    },
+                    {
+                        title: "Virksomheder",
+                        text: `Virksomheder har betydning, idet at de spreder informationer for at tjene penge, dette kan ændre, hvordan forfattere for virksomhederne skriver om emner.`,
+                        relation: [
+                            "Forfatter laver indhold til virksomhedernes online udtryk, nogle gange er de betalt af virksomhederne andre gange  bruger de virksomhedens platform.",
+                            "Indtægt har stor betydning for virksomheden, det nemlig altid dette en virskomhed forkusere på altid, i hvertfald på sigt skal stige.",
+                        ],
+                        type: TYPE_NON_HUMAN,
+                    },
+                    {
+                        title: "Læser",
+                        text: `Læseren er brugen af internet den der læser en tekst, dansk falig forstand, det vil sige en tekst kan være alt.`,
+                        relation: [
+                            "Forfatteren har en relation til læseren, idet det er personen, der påvirker læseren med teksten.",
+                            "Influerer videnen af læseren, og kan ændre deres tankegang.",
+                        ],
+                        type: TYPE_HUMAN,
+                    },
+                    {
+                        title: "Forfatter",
+                        text: `Forfatter er den der producere det der findes på internet`,
+                        relation: [
+                            "Kommunikerer til læseren (almene personer, institutioner, virksomheder) ved at udgive informationer på internettet. Findes gennem en søgemaskine.",
+                        ],
+                        type: TYPE_HUMAN,
+                    },
+                    {
+                        title: "Søgemaskine",
+                        text: `Søgemaskinen er den maskine du bruger til at søge efter hjemmesider.`,
+                        relation: [
+                            "Søgemaskinen er bygget på en algoritme, som kan give magt til dem, som kan styre algoritmens søgeresultater, samt dem der kan udnytte den.",
+                            "Søgemaskiner får deres Indtægt fra sponsorater, som gerne vil ligge som det første søgeresultat",
+                            "Folk der bruger søgemaskinen er folk, der ønsker information, Læser, eller en der ønsker at dele information, forfatter.",
+                            "Typisk er en søgemaskine knyttet en Browser",
+                        ],
+                        type: TYPE_NON_HUMAN,
+                    },
+                    {
+                        title: "Algoritme",
+                        text: `Det kode der virker magisk til at få alt på internettet til at virke.`,
+                        relation: [
+                            "Algoritmer finder man hos Søgemaskiner og Browsere, hvor man prøver at finde de bedste resultater for læseren",
+                        ],
+                        type: TYPE_NON_HUMAN,
+                    },
+                    {
+                        title: "Browser",
+                        text: `Browseren er et program til at browse internettet, typisk forudinstalleret på styresystemer. Eksempler er Firefox, Google Chrome og Safari.
+                        `,
+                        relation: ["Indtægt", "Søgemaskine", "Algoritme"],
+                        type: TYPE_NON_HUMAN,
+                    },
+                    {
+                        title: "Reklamer",
+                        text: `Reklamer er alle de annoncer vi prøver at flygte fra, men ender med at klikke på dem alligevel.`,
+                        relation: [
+                            "Har en betydning for virksomheder, idet det ofte er den primære indtægt. Dette gør at virksomheder har en interesse i at få flere visninger.",
+                            "Reklamer har en indflydelse på læseren og kan få dem til at lave købsvalg eller lignende.",
+                            "Hvis man bliver specielt distraheret af en baggrundsreklame, konkluderer man at man må være interesseret i produktet",
+                        ],
+                        type: TYPE_NON_HUMAN,
+                    },
+                    {
+                        title: "Institutioner",
+                        text: `En institution er en betegnelse for sociale strukturer eller mekanismer til styring og/eller regulering af flere individers samarbejde`,
+                        relation: [
+                            "Forfatterne er oftest knyttet til en organisation eller institution, som for eksempel TV2, hvor de deler viden gennem.",
+                            "Det samme gælder for læseren.",
+                        ],
+                        type: TYPE_NON_HUMAN,
+                    },
+                    {
+                        title: "Magt",
+                        text: ``,
+                        relation: [
+                            "Forfatterne har magt, da de bestemmer, hvad de vil dele ud, og hvad de vil undlade.",
+                            "Søgemaskinerne bestemmer, hvilke hjemmesider der skal komme op ved et søgeresultat, og en browser vælger hvilken standard søgemaskine der skal bruges.",
+                            "“Knowledge is power”",
+                        ],
+                        type: TYPE_IDE,
+                    },
+                    {
+                        title: "Tankegang",
+                        text: `En tankegang er et fænomen, mennesker påstår de har.`,
+                        relation: [
+                            "Når læseren optager ny information, ændrer det ens tankegang, direkte eller indirekte.",
+                        ],
+                        type: TYPE_IDE,
+                    },
+                    {
+                        title: "Distrahering",
+                        text: `At blive forstyrret i det man gerne vil lave af noget man ser på internet.`,
+                        relation: [
+                            "Læser bliver distraheret af reklamer, når man tilgår diverse hjemmesider.",
+                        ],
+                        type: TYPE_IDE,
+                    },
+                    {
+                        title: "Indtægt",
+                        text: `Monyes makes the world go round.`,
+                        relation: [
+                            "Når man bruger internettet, er der forskellige aktører som gavner af din aktivitet, som browsere og søgemaskiner.",
+                            "Virksomheder og forfattere kan også få en indtægt, hvis de benytter sig af reklamer, eller af en handelsside.",
+                        ],
+                        type: TYPE_IDE,
+                    },
+                    {
+                        title: "Viden",
+                        text: ``,
+                        relation: [
+                            "Læser indsamler viden gennem hjemmesider, men læseren ved ikke om denne informationer er “Fake News”, og skal derfor forholde sig kildekritisk.",
+                        ],
+                        type: TYPE_IDE,
+                    },
+                    {
+                        title: "Fake-news",
+                        text: `Donald trump`,
+                        relation: [
+                            "Fake News kan give misvisende information, og man skal derfor forholde sig kildekritisk.",
+                        ],
+                        type: TYPE_IDE,
+                    },
+                    {
+                        title: "Kildekritik",
+                        text: `Opærksomhed på hvem der er afsender på informationen.`,
+                        relation: [
+                            "Man skal være kildekritisk over for informationen på nettet, for at validere om det er fake news.",
+                        ],
+                        type: TYPE_IDE,
+                    },
+                    {
+                        title: "Hukommelse",
+                        text: `Fald i hukommelse evner.`,
+                        relation: [
+                            "For meget internetbrug over længere tid kan have en negativ påvirkning på nogle kognitive funktioner, især opmærksomhed og korttidshukommelse.",
+                        ],
+                        type: TYPE_IDE,
+                    },
+                ],
+                linksString: [
+                    {
+                        source: "Institutioner",
+                        target: "Læser",
+                    },
+                    {
+                        source: "Institutioner",
+                        target: "Forfatter",
+                    },
+                    {
+                        source: "Virksomheder",
+                        target: "Indtægt",
+                    },
+                    {
+                        source: "Virksomheder",
+                        target: "Forfatter",
+                    },
+                    {
+                        source: "Indtægt",
+                        target: "Virksomheder",
+                    },
+                    {
+                        source: "Indtægt",
+                        target: "Browser",
+                    },
+                    {
+                        source: "Indtægt",
+                        target: "Søgemaskine",
+                    },
+                    {
+                        source: "Indtægt",
+                        target: "Reklamer",
+                    },
+                    {
+                        source: "Forfatter",
+                        target: "Læser",
+                    },
+                    {
+                        source: "Forfatter",
+                        target: "Internet som informationskilde",
+                    },
+                    {
+                        source: "Forfatter",
+                        target: "Viden",
+                    },
+                    {
+                        source: "Forfatter",
+                        target: "Magt",
+                    },
+                    {
+                        source: "Browser",
+                        target: "Magt",
+                    },
+                    {
+                        source: "Browser",
+                        target: "Internet som informationskilde",
+                    },
+                    {
+                        source: "Browser",
+                        target: "Søgemaskine",
+                    },
+                    {
+                        source: "Browser",
+                        target: "Algoritme",
+                    },
+                    {
+                        source: "Algoritme",
+                        target: "Søgemaskine",
+                    },
+                    {
+                        source: "Magt",
+                        target: "Søgemaskine",
+                    },
+                    {
+                        source: "Internet som informationskilde",
+                        target: "Læser",
+                    },
+                    {
+                        source: "Internet som informationskilde",
+                        target: "Søgemaskine",
+                    },
+                    {
+                        source: "Søgemaskine",
+                        target: "Læser",
+                    },
+                    {
+                        source: "Tankegang",
+                        target: "Læser",
+                    },
+                    {
+                        source: "Kildekritik",
+                        target: "Viden",
+                    },
+                    {
+                        source: "Kildekritik",
+                        target: "Fake-news",
+                    },
+                    {
+                        source: "Viden",
+                        target: "Fake-news",
+                    },
+                    {
+                        source: "Viden",
+                        target: "Hukommelse",
+                    },
+                    {
+                        source: "Viden",
+                        target: "Læser",
+                    },
+                    {
+                        source: "Læser",
+                        target: "Hukommelse",
+                    },
+                    {
+                        source: "Læser",
+                        target: "Reklamer",
+                    },
+                    {
+                        source: "Læser",
+                        target: "Distrahering",
+                    },
+                    {
+                        source: "Reklamer",
+                        target: "Distrahering",
+                    },
+                ],
+            };
+
+            gData.links = gData.linksString.map((link) => {
+                const a = gData.nodes.findIndex(
+                    (node) => node.title === link.source
+                );
+                const b = gData.nodes.findIndex(
+                    (node) => node.title === link.target
+                );
+
+                if (a === -1 || b === -1) {
+                    console.log("ERROR", link);
+                    return;
+                }
+
+                gData.nodes[a].id = a;
+                gData.nodes[b].id = b;
+
+                return { source: a, target: b };
+            });
+
+            // cross-link node objects
+            gData.links.forEach((link) => {
+                const a = gData.nodes[link.source];
+                const b = gData.nodes[link.target];
+
+                if (!a || !b) {
+                    console.log("ERROR", link);
+                    return;
+                }
+                console.log("LINK", link, a, b);
+
+                !a.neighbors && (a.neighbors = []);
+                !b.neighbors && (b.neighbors = []);
+                a.neighbors.push(b);
+                b.neighbors.push(a);
+
+                !a.links && (a.links = []);
+                !b.links && (b.links = []);
+
                 a.links.push(link);
                 b.links.push(link);
             });
