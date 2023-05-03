@@ -325,9 +325,12 @@
                     },
                     {
                         title: "Browser",
-                        text: `Browseren er et program til at browse internettet, typisk forudinstalleret på styresystemer. Eksempler er Firefox, Google Chrome og Safari.
-                        `,
-                        relation: ["Indtægt", "Søgemaskine", "Algoritme"],
+                        text: `Browseren er et program til at browse internettet, typisk forudinstalleret på styresystemer. Eksempler er Firefox, Google Chrome og Safari.`,
+                        relation: [
+                            "Indtægt fra reklamer, som er målrettet mod læseren.",
+                            "Søgemaskiner er typisk defualt i en browser, og er derfor en del af browseren.",
+                            "Algoritmer i en browser kan have betydning for læseren, idet de kan påvirke læserens valg af hjemmeside.",
+                        ],
                         type: TYPE_NON_HUMAN,
                     },
                     {
@@ -386,7 +389,7 @@
                     },
                     {
                         title: "Viden",
-                        text: ``,
+                        text: `Kendskab til noget.`,
                         relation: [
                             "Læser indsamler viden gennem hjemmesider, men læseren ved ikke om denne informationer er “Fake News”, og skal derfor forholde sig kildekritisk.",
                         ],
@@ -765,9 +768,8 @@
                             Noderne repræsenterer forskellige typer aktører.
                         </li>
                         <li>
-                            Retningen på forbindelsen mellem aktører kan se ved
-                            at klikke på en node eller ved at holde musen over
-                            en node.
+                            Forbindelsen mellem aktører kan ses på de små kugler
+                            hvis en node er trykket.
                         </li>
                     </ul>
                 </div>
